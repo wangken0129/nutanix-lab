@@ -8,7 +8,7 @@ Nutanix Installation.
     前三項為裝機基本安裝
 3. VM Create, vSwtich Setting 
 4. VM HA 
-5. Netork HA 
+5. Network HA 
 6. File Server
 7. NKE
 8. NCC Check

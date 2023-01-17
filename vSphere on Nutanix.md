@@ -1,4 +1,4 @@
-# Install vSphere
+# vSphere on Nutanix
 
 https://portal.nutanix.com/page/documents/details?targetId=vSphere-Admin6-AOS-v6_5:vsp-cluster-introduction-vsphere-c.html
 
@@ -19,7 +19,9 @@ https://portal.nutanix.com/page/documents/details?targetId=vSphere-Admin6-AOS-v6
 
 3. 刪除Default Container,再新增一個 (因名稱太長)
 
-4. Deploy vCenter or Registry to vCenter
+4. 設定Virtual IP、Data Service IP
+
+5. Deploy vCenter or Registry to vCenter
    ![image-20230117115309394](assets/image-20230117115309394.png)
 
    ![image-20230117115414091](assets/image-20230117115414091.png)
@@ -34,8 +36,7 @@ https://portal.nutanix.com/page/documents/details?targetId=vSphere-Admin6-AOS-v6
 
    ![image-20230117121557920](assets/image-20230117121557920.png)
    
-
-5. vCenter Setting
+6. vCenter Setting
 
    - 先在vCenter Create Datacenter並新增Nutanix Cluster
      Cluster **開啟DRS、HA**
@@ -44,7 +45,7 @@ https://portal.nutanix.com/page/documents/details?targetId=vSphere-Admin6-AOS-v6
 
    ![image-20230117131129201](assets/image-20230117131129201.png)
 
-6. **確認Checklist都有設定完畢才能加入Nutanix Node**
+7. **確認Checklist都有設定完畢才能加入Nutanix Node**
    HA
 
    - Enable Host Monitoring
@@ -100,7 +101,7 @@ https://portal.nutanix.com/page/documents/details?targetId=vSphere-Admin6-AOS-v6
    - Configure Nutanix CVMs with the appropriate VM overrides. --After register
      (HA、DRS、Monitoring **Disabled**)
 
-7. vCenter Adding Nutanix nodes
+8. vCenter Adding Nutanix nodes
 
    ![image-20230117141404460](assets/image-20230117141404460.png)
 
@@ -113,14 +114,14 @@ https://portal.nutanix.com/page/documents/details?targetId=vSphere-Admin6-AOS-v6
    實測第一台Node會被順利加到Cluster內,其他兩台需手動移入
    ![image-20230117142411214](assets/image-20230117142411214.png)
 
-8. 補齊Checklist的設定
+9. 補齊Checklist的設定
 
-9. Register Nutanix Cluster to vCenter
-   ![image-20230117143835885](assets/image-20230117143835885.png)
+10. Register Nutanix Cluster to vCenter
+    ![image-20230117143835885](assets/image-20230117143835885.png)
 
-   ![image-20230117143908067](assets/image-20230117143908067.png)
+    ![image-20230117143908067](assets/image-20230117143908067.png)
 
-   ![image-20230117144024141](assets/image-20230117144024141.png)
+    ![image-20230117144024141](assets/image-20230117144024141.png)
 
 
 
@@ -128,7 +129,7 @@ https://portal.nutanix.com/page/documents/details?targetId=vSphere-Admin6-AOS-v6
 
 https://portal.nutanix.com/page/documents/details?targetId=Acropolis-Upgrade-Guide:upg-vm-install-wc-r.html
 
-1. create PC
+1. create PC (可用Online下載或是部署時上傳PC的檔案)
    <img src="assets/image-20230117144856189.png" alt="image-20230117144856189" style="zoom:50%;" />
 
    <img src="assets/image-20230117144919733.png" alt="image-20230117144919733" style="zoom:50%;" />
@@ -136,11 +137,35 @@ https://portal.nutanix.com/page/documents/details?targetId=Acropolis-Upgrade-Gui
    <img src="assets/image-20230117145119576.png" alt="image-20230117145119576" style="zoom:50%;" />
    
 
-2. 123
+   ![image-20230117160527103](assets/image-20230117160527103.png)
 
-3. 123
+2. PC建立好後即可用web連線
+   預設帳密 admin , Nutanix/4u
+   若無法登入web,可以在PE開PCVM的console,用nutanix / nutanix/4u的帳密登入
+   登入後切換身份為root 執行以下指令來重設admin密碼
 
-4. 123
+   ```
+   ncli user reset-password user-name=admin password=password
+   ```
+
+   ![image-20230117162037651](assets/image-20230117162037651.png)
+   
+3. 註冊Nutanix Cluster至Prism Central (PC)
+   ![image-20230117162121479](assets/image-20230117162121479.png)
+   ![image-20230117162141769](assets/image-20230117162141769.png)
+
+   ![image-20230117162216948](assets/image-20230117162216948.png)
+   
+4. 註冊完成即可在PC上看到Nutanix Cluster
+   ![image-20230117162314773](assets/image-20230117162314773.png)
+
+5. Prism Central 設定NTP、DNS Server
+
+6. Enable Microserivces Infrastructure (可使用更多功能)
+   https://portal.nutanix.com/page/documents/details?targetId=Prism-Central-Guide-vpc_2022_6:mul-cmsp-overview-pc-c.html
+
+
+   ![image-20230117162822002](assets/image-20230117162822002.png)
 
 
 

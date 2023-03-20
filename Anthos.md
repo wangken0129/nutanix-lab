@@ -25,14 +25,14 @@ https://cloud.google.com/anthos/run/docs/securing/service-accounts
 
 ## 資訊
 
-1. NX3500PE Cluster , Block SN: 13SM35330024
+1. NX3500PE Cluster , Block SN: 13SMxxxx
 
 | 項目                          | SN                  | IPMI MAC          | IPMI IP         | CVM IP       | AHV IP             |
 | ----------------------------- | ------------------- | ----------------- | --------------- | ------------ | ------------------ |
-| NodeA-AHV1                    | ZM137S025587        | 00:25:90:d3:c8:23 | 10.0.90.2       | 172.16.90.61 | 172.16.90.51       |
-| NodeB-AHV2                    | ZM139S125484        | 00:25:90:d8:74:17 | 10.0.90.3       | 172.16.90.62 | 172.16.90.52       |
-| NodeC-AHV3                    | ZM137S025585        | 00:25:90:d3:c8:20 | 10.0.90.4       | 172.16.90.63 | 172.16.90.53       |
-| NodeD-AHV4                    | ZM137S025604        | 00:25:90:d3:c7:f4 | 10.0.90.5       | 172.16.90.64 | 172.16.90.54       |
+| NodeA-AHV1                    | ZM137Sxxxxx7        | 00:25:90:d3:c8:23 | 10.0.90.2       | 172.16.90.61 | 172.16.90.51       |
+| NodeB-AHV2                    | ZM139Sxxxxxx        | 00:25:90:d8:74:17 | 10.0.90.3       | 172.16.90.62 | 172.16.90.52       |
+| NodeC-AHV3                    | ZM137xxxxxx5        | 00:25:90:d3:c8:20 | 10.0.90.4       | 172.16.90.63 | 172.16.90.53       |
+| NodeD-AHV4                    | ZM13xxxxx604        | 00:25:90:d3:c7:f4 | 10.0.90.5       | 172.16.90.64 | 172.16.90.54       |
 | PE Cluster                    | NX3500PE            | 172.16.90.71      | admin           |              |                    |
 | PC Cluster                    | NX3500PC            | 172.16.90.72      | admin           |              |                    |
 | **SSD、HDD per node**         | **Memory per node** | **IPMI Account**  | **IPMI Passwd** | **Account**  | **CVM,AHV Passwd** |

@@ -17,11 +17,11 @@ https://cloud.google.com/anthos/run/docs/securing/service-accounts
 
 ## 架構
 
-![img](../../../Documents/GitHub/nutanix-lab/assets/Anthos-clusters-on-AHV-Architecture-1024x733.png)
+![img](assets/Anthos-clusters-on-AHV-Architecture-1024x733.png)
 
-![image-20230308145723976](../../../Documents/GitHub/nutanix-lab/assets/Anthos_Provisioning.png)
+![image-20230308145723976](assets/Anthos_Provisioning.png)
 
-![image-20230308152356698](../../../Documents/GitHub/nutanix-lab/assets/Anthos_Price.png)
+![image-20230308152356698](assets/Anthos_Price.png)
 
 ## 資訊
 
@@ -108,39 +108,39 @@ Google Cloud
 ```
 
 1. google Anthos帳戶
-   ![image-20230314102840587](../../../Documents/GitHub/nutanix-lab/assets/anthos-free plan.png)
+   ![image-20230314102840587](assets/anthos-free plan.png)
 2. Nutanix Prism Central enable Calm
 
-![image-20230314102940274](../../../Documents/GitHub/nutanix-lab/assets/anthos_Clam.png)
+![image-20230314102940274](assets/anthos_Clam.png)
 
 ### Anthos
 
 #### Create Service Accounts
 
 1. 進入IAM與管理,點選project (Anthos-Test-202303)
-   ![image-20230314115438141](../../../Documents/GitHub/nutanix-lab/assets/anthos-sa01.png)
+   ![image-20230314115438141](assets/anthos-sa01.png)
 
 2. 點選建立服務帳戶
-   ![image-20230314115626110](../../../Documents/GitHub/nutanix-lab/assets/anthos-sa02.png)
+   ![image-20230314115626110](assets/anthos-sa02.png)
 
 3. 給擁有者的權限
 
-   ![image-20230314115729988](../../../Documents/GitHub/nutanix-lab/assets/anthos-sa03.png)
+   ![image-20230314115729988](assets/anthos-sa03.png)
 
 4. 郵件地址複製
    netfos@anthos-test-202303.iam.gserviceaccount.com
 
 5. 點選該服務帳戶,新增金鑰
-   ![image-20230314115902286](../../../Documents/GitHub/nutanix-lab/assets/anthos-sa04.png)
+   ![image-20230314115902286](assets/anthos-sa04.png)
 
 6. 儲存金鑰
-   ![image-20230314120003591](../../../Documents/GitHub/nutanix-lab/assets/anthos-sa05.png)
-   ![image-20230314120124523](../../../Documents/GitHub/nutanix-lab/assets/anthos-sa06.png)
+   ![image-20230314120003591](assets/anthos-sa05.png)
+   ![image-20230314120124523](assets/anthos-sa06.png)
 
 #### Create Anthos Bare metal
 
 1. 啟用Anthos
-   ![image-20230314110332738](../../../Documents/GitHub/nutanix-lab/assets/anthos-active01.png)
+   ![image-20230314110332738](assets/anthos-active01.png)
    
    
 
@@ -148,26 +148,26 @@ Google Cloud
 
 1. IPAM設定IP Pool
 
-   ![image-20230314111246357](../../../Documents/GitHub/nutanix-lab/assets/anthos-IPAM.png)
+   ![image-20230314111246357](assets/anthos-IPAM.png)
 
 2. Calm建立Project
-   ![image-20230314113139889](../../../Documents/GitHub/nutanix-lab/assets/anthos-project01.png)
+   ![image-20230314113139889](assets/anthos-project01.png)
 
-   ![image-20230314113258956](../../../Documents/GitHub/nutanix-lab/assets/anthos-project02.png)
+   ![image-20230314113258956](assets/anthos-project02.png)
 
-   ![image-20230314155154308](../../../Documents/GitHub/nutanix-lab/assets/anthos-project03.png)
+   ![image-20230314155154308](assets/anthos-project03.png)
 
 3. 上傳github 上的 blueprint
-   ![image-20230314113458998](../../../Documents/GitHub/nutanix-lab/assets/anthos-blueprint.png)
-   ![image-20230314113547773](../../../Documents/GitHub/nutanix-lab/assets/anthos-blueprint02.png)
+   ![image-20230314113458998](assets/anthos-blueprint.png)
+   ![image-20230314113547773](assets/anthos-blueprint02.png)
 
 4. 調整參數可以安裝時再輸入即可 (有藍色的人代表安裝時可以輸入)
 
 5. VM網卡要先設定好
-   ![image-20230314160312365](../../../Documents/GitHub/nutanix-lab/assets/anthos-bp-network.png)
+   ![image-20230314160312365](assets/anthos-bp-network.png)
 
 6. Credential 要先輸入
-   ![image-20230314152343047](../../../Documents/GitHub/nutanix-lab/assets/anthos-cred.png)
+   ![image-20230314152343047](assets/anthos-cred.png)
 
 7. CRED_OS ssh-keygen
 
@@ -223,28 +223,28 @@ Google Cloud
    ```
 
 9. 輸入完後按save , 執行
-   ![image-20230314153857881](../../../Documents/GitHub/nutanix-lab/assets/anthos-launch.png)
+   ![image-20230314153857881](assets/anthos-launch.png)
 
 10. 填入資訊
-    ![image-20230314154058030](../../../Documents/GitHub/nutanix-lab/assets/anthos-lauch01.png)
+    ![image-20230314154058030](assets/anthos-lauch01.png)
 
 11. IP 資訊
-    ![image-20230314154540212](../../../Documents/GitHub/nutanix-lab/assets/anthos-lauch02.png)
+    ![image-20230314154540212](assets/anthos-lauch02.png)
 
 12. IP 資訊
-    ![image-20230314154644473](../../../Documents/GitHub/nutanix-lab/assets/anthos-lauch03.png)
+    ![image-20230314154644473](assets/anthos-lauch03.png)
 
 13. Deploy
-    ![image-20230314160527582](../../../Documents/GitHub/nutanix-lab/assets/anthos-deploy.png)
+    ![image-20230314160527582](assets/anthos-deploy.png)
 
 14. 自動化部屬
-    ![image-20230314160559318](../../../Documents/GitHub/nutanix-lab/assets/anthos-deploy05.png)
+    ![image-20230314160559318](assets/anthos-deploy05.png)
 
 15. Manage可以查看目前的部署狀態
-    ![image-20230314160801127](../../../Documents/GitHub/nutanix-lab/assets/anthos-deploy06.png)
+    ![image-20230314160801127](assets/anthos-deploy06.png)
 
 16. 部署完成
-    ![image-20230314173530825](../../../Documents/GitHub/nutanix-lab/assets/anthos-vm.png)
+    ![image-20230314173530825](assets/anthos-vm.png)
 
 17. 登入Admin VM 取得Secret並在Anthos Console登入
 
@@ -298,20 +298,20 @@ Google Cloud
     
 
 18. 登入完成
-    ![image-20230314174734950](../../../Documents/GitHub/nutanix-lab/assets/anthos-login.png)
+    ![image-20230314174734950](assets/anthos-login.png)
 
-    ![image-20230314175007215](../../../Documents/GitHub/nutanix-lab/assets/anthos-GKE.png)
+    ![image-20230314175007215](assets/anthos-GKE.png)
 
 19. Workload
-    ![image-20230314175203478](../../../Documents/GitHub/nutanix-lab/assets/anthos-workload.png)
+    ![image-20230314175203478](assets/anthos-workload.png)
 
 20. Marketplace部署測試程式
-    ![image-20230314175624682](../../../Documents/GitHub/nutanix-lab/assets/anthos-marketplace01.png)
+    ![image-20230314175624682](assets/anthos-marketplace01.png)
 
 21. 設定並部署
-    ![image-20230314175712418](../../../Documents/GitHub/nutanix-lab/assets/anthos-marketplace02.png)
+    ![image-20230314175712418](assets/anthos-marketplace02.png)
 
-    ![image-20230314180133597](../../../Documents/GitHub/nutanix-lab/assets/anthos-marketplace03.png)
+    ![image-20230314180133597](assets/anthos-marketplace03.png)
 
 22. 在地端查看namespace狀態
 
@@ -401,15 +401,15 @@ Google Cloud
     ```
 
 24. IngressVIP : 172.16.90.213
-    ![image-20230320170954778](../../../Documents/GitHub/nutanix-lab/assets/anthos-redmine.png)
+    ![image-20230320170954778](assets/anthos-redmine.png)
 
 25. anthos畫面
-    ![image-20230320171120742](../../../Documents/GitHub/nutanix-lab/assets/anthos-redmine2.png)
+    ![image-20230320171120742](assets/anthos-redmine2.png)
 
-    ![image-20230320171223253](../../../Documents/GitHub/nutanix-lab/assets/anthos-redmine3.png)
+    ![image-20230320171223253](assets/anthos-redmine3.png)
 
     StorageClass --> default block storage
 
-    ![image-20230320171344271](../../../Documents/GitHub/nutanix-lab/assets/anthos-redmine4.png)
+    ![image-20230320171344271](assets/anthos-redmine4.png)
 
     

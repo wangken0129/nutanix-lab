@@ -13,6 +13,8 @@ https://itnext.io/guide-install-openshift-4-12-using-ipi-on-nutanix-ce-2-0-3bee9
 憑證
 https://sdwh.dev/posts/2021/03/IIS-Create-Certificate-Signed-Requests-With-MMC/
 
+https://www.firewall.cx/microsoft-knowledgebase/windows-server-2016/1260-how-to-enaable-webserver-certificate-template.htmls
+
 
 
 ## Requrements
@@ -79,7 +81,7 @@ DNS:
 
    
 
-   此處DNS改為 nx3500pc.ken.lab 圖為錯誤的DNS
+   選擇Web伺服器、並調整設定，此處DNS改為 nx3500pc.ken.lab 圖為錯誤的DNS
 
    ![image-20230324140230705](assets/ocp_ad_ca.png)
 
@@ -341,7 +343,7 @@ DNS:
    release architecture amd64
    
    [ken@bastion ocp_install]$ RELEASE_IMAGE=$(./openshift-install version | awk '/release image/ {print $3}')
-   [ken@bastion ocp_install]$ oc adm release extract --credentials-requests --cloud=nutanix --to=./credrequests $RELEASE_IMAGE
+   [ken@bastion ocp_install]$  
    Extracted release payload created at 2023-03-08T13:56:42Z
    
    [ken@bastion ocp_install]$ cd credrequests/
@@ -512,10 +514,6 @@ DNS:
    
    0 directories, 14 files
    ```
-
-9. 123
-
-10. 123
 
 #### 創立Cluster
 
@@ -790,11 +788,301 @@ DNS:
    ERROR failed to initialize the cluster: Cluster operators authentication, console, ingress, machine-api, monitoring are not available 
    ```
 
+9. 把工作目錄/home/ken/ocp_install/412刪除
+
+   ```
+   發現因為bootstrap、master、worker都是透過IPAM的方式給予ip 共7個ip
+   所以在PE上面的IPAM有少給,修正後重試
+   且DNS設定錯誤 應為*.apps而非*.app
+   ```
+
+   ![image-20230325163136956](assets/ocp_IPAM2.png)
+
+10. 再次複製檔案然後重新執行一次,log改成debug
+
+    ```
+    [ken@bastion 412]$ ./openshift-install create cluster --dir /home/ken/ocp_install/412/ --log-level=info
+    
+    
+    DEBUG nutanix_image.rhcos: Creation complete after 3m49s [id=5bee86a5-ef8b-4316-b8da-dbe5e5e3f237]
+    DEBUG nutanix_virtual_machine.vm_master[0]: Creating...
+    DEBUG nutanix_virtual_machine.vm_master[1]: Creating...
+    DEBUG nutanix_virtual_machine.vm_master[2]: Creating...
+    
+    OpenShift Installer 4.12.7
+    DEBUG Built from commit 7c2530226516a12c37f10bc14e070f66c0f27930
+    INFO Waiting up to 20m0s (until 4:57PM) for the Kubernetes API at https://api.ocp.ken.lab:6443...
+    DEBUG Loading Agent Config...
+    DEBUG Still waiting for the Kubernetes API: Get "https://api.ocp.ken.lab:6443/version": dial tcp 172.16.90.223:6443: connect: no route to host
+    
+    
+    INFO API v1.25.4+18eadca up
+    DEBUG Loading Install Config...
+    DEBUG   Loading SSH Key...
+    DEBUG   Loading Base Domain...
+    DEBUG     Loading Platform...
+    DEBUG   Loading Cluster Name...
+    DEBUG     Loading Base Domain...
+    DEBUG     Loading Platform...
+    DEBUG   Loading Networking...
+    DEBUG     Loading Platform...
+    DEBUG   Loading Pull Secret...
+    DEBUG   Loading Platform...
+    DEBUG Using Install Config loaded from state file
+    INFO Waiting up to 30m0s (until 5:11PM) for bootstrapping to complete...
+    ```
+
+11. failed , worker node沒有建立
+    修正項目
+
+    ```
+    1. DNS 正解加上 api-int.ocp.ken.lab
+    2. DNS 反解加上 nx3500pe.ken.lab、nx3500pc.ken.lab、api.ocp.ken.lab、api-int.ocp.ken.lab
+    3. nx3500pe.ken.lab 加上憑證與nx3500pc的方式相同
+    4. install-config.ymal 的platform要指定nutanix
+    5. 修改登入pc帳號為ocpadmin
+    6. 關鍵: 要在install-config 加上proxy的憑證設定,把rootCA加上去
+    ```
+
+#### 4.12.6
+
+1. 下載openshift-install、oc client 4.12.6
+
+   ```
+   [ken@bastion ~]$ wget https://mirror.openshift.com/pub/openshift-v4/amd64/client                                                                                                 s/ocp/4.12.6/openshift-client-linux-4.12.6.tar.gz
+   --2023-03-25 17:25:07--  https://mirror.openshift.com/pub/openshift-v4/amd64/cli                                                                                                 ents/ocp/4.12.6/openshift-client-linux-4.12.6.tar.gz
+   Resolving mirror.openshift.com (mirror.openshift.com)... 99.86.38.9, 99.86.38.10                                                                                                 3, 99.86.38.78, ...
+   Connecting to mirror.openshift.com (mirror.openshift.com)|99.86.38.9|:443... con                                                                                                 nected.
+   HTTP request sent, awaiting response... 200 OK
+   Length: 55162043 (53M) [application/x-tar]
+   Saving to: ‘openshift-client-linux-4.12.6.tar.gz’
    
+   openshift-client-li 100%[===================>]  52.61M  8.16MB/s    in 7.4s
+   
+   2023-03-25 17:25:23 (7.15 MB/s) - ‘openshift-client-linux-4.12.6.tar.gz’ saved [                                                                                                 55162043/55162043]
+   
+   [ken@bastion ~]$ wget https://mirror.openshift.com/pub/openshift-v4/amd64/client                                                                                               s/ocp/4.12.6/openshift-install-linux-4.12.6.tar.gz
+   --2023-03-25 17:25:27--  https://mirror.openshift.com/pub/openshift-v4/amd64/cli                                                                                                 ents/ocp/4.12.6/openshift-install-linux-4.12.6.tar.gz
+   Resolving mirror.openshift.com (mirror.openshift.com)... 99.86.38.103, 99.86.38.                                                                                                 78, 99.86.38.31, ...
+   Connecting to mirror.openshift.com (mirror.openshift.com)|99.86.38.103|:443... c                                                                                                 onnected.
+   HTTP request sent, awaiting response... 200 OK
+   Length: 350162888 (334M) [application/x-tar]
+   Saving to: ‘openshift-install-linux-4.12.6.tar.gz’
+   
+   openshift-install-linux-4.12.6.tar.gz        100%[===========================================================================================>] 333.94M  9.02MB/s    in 40s
+   
+   2023-03-25 17:26:09 (8.29 MB/s) - ‘openshift-install-linux-4.12.6.tar.gz’ saved [350162888/350162888]
+   ```
 
-9. 123
+2. 解壓縮並放到/usr/local/bin
 
-10. 123
+   ```
+   [ken@bastion ~]$ mkdir tools
+   [ken@bastion ~]$ cp openshift-client-linux-4.12.6.tar.gz openshift-install-linux-4.12.6.tar.gz tools/
+   [ken@bastion ~]$ cd tools/
+   [ken@bastion tools]$ tar xvf openshift-client-linux-4.12.6.tar.gz
+   README.md
+   oc
+   kubectl
+   [ken@bastion tools]$ tar xvf openshift-install-linux-4.12.6.tar.gz
+   README.md
+   openshift-install
+   [ken@bastion tools]$ sudo cp openshift-install oc /usr/local/bin/
+   [sudo] password for ken:
+   
+   [ken@bastion ~]$ openshift-install version
+   openshift-install 4.12.6
+   built from commit fd9e75e61946e79de4e5d9959c7d681cc0271043
+   release image quay.io/openshift-release-dev/ocp-release@sha256:800d1e39d145664975a3bb7cbc6e674fbf78e3c45b5dde9ff2c5a11a8690c87b
+   release architecture amd64
+   
+   [ken@bastion ~]$ oc version
+   Client Version: 4.12.6
+   Kustomize Version: v4.5.7
+   ```
+
+3. 執行openshift-installer
+
+   ```
+   [ken@bastion ~]$ mkdir ocp_4-12-6
+   [ken@bastion ~]$ openshift-install create install-config --dir /home/ken/ocp_4-12-6/
+   ? SSH Public Key /home/ken/.ssh/ken.pub
+   ? Platform nutanix
+   ? Prism Central nx3500pc.ken.lab
+   ? Port 9440
+   ? Username admin
+   ? Password [? for help] **************
+   INFO Connecting to Prism Central nx3500pc.ken.lab
+   ? Prism Element NX3500PE
+   ? Subnet Netfos_90_Access_IPAM
+   X Sorry, your reply was invalid: IP expected to be in one of the machine networks: 10.0.0.0/16
+   ? Virtual IP Address for API 10.0.0.1
+   ? Virtual IP Address for Ingress 10.0.0.2
+   ? Base Domain ken.lab
+   ? Cluster Name ocp
+   ? Pull Secret [? for help] 
+   {"auths":{"cloud.openshift.com":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K29jbV9hY2Nlc3NfN2FiMGVmMjg5NTc5NGQ2ODgzOGYwZTYzNGI4OWRkNjI6Mk5CREU5T1NZTEdHWUtLOEFGOUlDTTcyMzZVSUVMSzUxTUpGOFcyWEdPSk9BU1haTDc1S0hQMUZHWURLNzgwSw==","email":"kenwang906@gmail.com"},"quay.io":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K29jbV9hY2Nlc3NfN2FiMGVmMjg5NTc5NGQ2ODgzOGYwZTYzNGI4OWRkNjI6Mk5CREU5T1NZTEdHWUtLOEFGOUlDTTcyMzZVSUVMSzUxTUpGOFcyWEdPSk9BU1haTDc1S0hQMUZHWURLNzgwSw==","email":"kenwang906@gmail.com"},"registry.connect.redhat.com":{"auth":"fHVoYy1wb29sLWU2MjU1MTBkLTE1ZjAtNGE5NS1iNGJjLTk2MzU5NTgzYmNmZTpleUpoYkdjaU9pSlNVelV4TWlKOS5leUp6ZFdJaU9pSTFOR0l3T1RVNE5HUTJZMkUwTUdJME9HRXlNVFExTWpRM1lqZGhNVGt6WlNKOS5vUm5uQ0tVQVZ2T3hyYk5la0JaTlNRdUhzTXVZV3BhM2tGdTNJQ2tzQ3NGSjhsaDZVUGdRb1NnM0hXT3IzcHAyVy15MVNBN29BNnRlbTB0ekVfenZwTTJCeWxsUkNnVEh1RlNZSE1DamxXRTZ2NUhDRjB2S3dtUFZ1ODNuRzRaakFwZzJRSk9kYkg4XzFaT0xDNlBqbkFGSi1uSDVLZFBxU3JNd3g1b19yYnZPQVRSRXktX2lQVW9zMXc0bTRzNUNncm9FNkFwNk5qY3FTanlGdjJOcDA5QVQ4aVA3Xzk4d2FfMW1WUEI4QkItcVJBVi1xclFYRGY0cEtwMzlYNExoNzgyalZYQ1V1SnZJUjN1SUdVUm1qWGVaYTEzSG5VcHcxdFc4aXZuUjVaV19iZndjZmoxR3FVVGo1a0stczJmeTdlNHFvSzdJTklGajJOZkM2dGhnZU5ST2FlR3E1dDZhUUV3dnV4UDV2dFViOTNEdElfc3JUOG5vcUszTXI2NkRLMUNTUTlianZMUkxNMVZOY2xCdUp2RS1yZGxkTDAyQ0ZkWTZJcmZ1VUpzN1VvcVE3WWdISWFVSFk3SDlGVE9qOWdsaWlSUTZ3MlhJNDM0dHNxTDJHLU85Ty1LTGVFUnF4ZjROY0o3NkFzaGE3aTNORW4yWHZaV0JmdXNmWEsyQUVscUt2N1FSQXhWVTFNQXN1TDdmTVNVaktrWkZFUUR2ZEZ2Tktoem1iVUVRTjl0dDMycFNvYVpCWnltRVB0WVl2ZzNPdG9pLW55Zmh1X1pzVEJzQkxRTGVZNTRJc2dZWk4zV0ZtV0hSSlBZOG53dm84bjZEN1lrT2ZqNzFhMEF5b3Btc2ZuLWp0Uk5KU3g3RGlCSlV3SkRnbFJYXzI1Y3lXR0JsZjFvODE1cw==","email":"kenwang906@gmail.com"},"registry.redhat.io":{"auth":"fHVoYy1wb29sLWU2MjU1MTBkLTE1ZjAtNGE5NS1iNGJjLTk2MzU5NTgzYmNmZTpleUpoYkdjaU9pSlNVelV4TWlKOS5leUp6ZFdJaU9pSTFOR0l3T1RVNE5HUTJZMkUwTUdJME9HRXlNVFExTWpRM1lqZGhNVGt6WlNKOS5vUm5uQ0tVQVZ2T3hyYk5la0JaTlNRdUhzTXVZV3BhM2tGdTNJQ2tzQ3NGSjhsaDZVUGdRb1NnM0hXT3IzcHAyVy15MVNBN29BNnRlbTB0ekVfenZwTTJCeWxsUkNnVEh1RlNZSE1DamxXRTZ2NUhDRjB2S3dtUFZ1ODNuRzRaakFwZzJRSk9kYkg4XzFaT0xDNlBqbkFGSi1uSDVLZFBxU3JNd3g1b19yYnZPQVRSRXktX2lQVW9zMXc0bTRzNUNncm9FNkFwNk5qY3FTanlGdjJOcDA5QVQ4aVA3Xzk4d2FfMW1WUEI4QkItcVJBVi1xclFYRGY0cEtwMzlYNExoNzgyalZYQ1V1SnZJUjN1SUdVUm1qWGVaYTEzSG5VcHcxdFc4aXZuUjVaV19iZndjZmoxR3FVVGo1a0stczJmeTdlNHFvSzdJTklGajJOZkM2dGhnZU5ST2FlR3E1dDZhUUV3dnV4UDV2dFViOTNEdElfc3JUOG5vcUszTXI2NkRLMUNTUTlianZMUkxNMVZOY2xCdUp2RS1yZGxkTDAyQ0ZkWTZJcmZ1VUpzN1VvcVE3WWdISWFVSFk3SDlGVE9qOWdsaWlSUTZ3MlhJNDM0dHNxTDJHLU85Ty1LTGVFUnF4ZjROY0o3NkFzaGE3aTNORW4yWHZaV0JmdXNmWEsyQUVscUt2N1FSQXhWVTFNQXN1TDdmTVNVaktrWkZFUUR2ZEZ2Tktoem1iVUVRTjl0dDMycFNvYVpCWnltRVB0WVl2ZzNPdG9pLW55Zmh1X1pzVEJzQkxRTGVZNTRJc2dZWk4zV0ZtV0hSSlBZOG53dm84bjZEN1lrT2ZqNzFhMEF5b3Btc2ZuLWp0Uk5KU3g3RGlCSlV3SkRnbFJYXzI1Y3lXR0JsZjFvODE1cw==","email":"kenwang906@gmail.com"}}}
+   
+   ******************************************************************************************************************************************************INFO Install-Config created in: /home/ken/ocp_4-12-6
+   
+   ```
+
+4. 修改install-config.yaml
+
+   ```
+   [ken@bastion ~]$ cd ocp_4-12-6/
+   [ken@bastion ocp_4-12-6]$ ll
+   total 4
+   -rw-r-----. 1 ken ken 3873 Mar 25 17:33 install-config.yaml
+   [ken@bastion ocp_4-12-6]$ vim install-config.yaml
+   [ken@bastion ocp_4-12-6]$ cat install-config.yaml
+   additionalTrustBundlePolicy: Proxyonly
+   apiVersion: v1
+   baseDomain: ken.lab
+   compute:
+   - architecture: amd64
+     hyperthreading: Enabled
+     name: worker
+     replicas: 3
+     platform:
+       nutanix:
+         cpus: 2
+         coresPerSocket: 2
+         memoryMiB: 8196
+         osDisk:
+           diskSizeGiB: 120
+   controlPlane:
+     architecture: amd64
+     hyperthreading: Enabled
+     name: master
+     replicas: 3
+     platform:
+       nutanix:
+         cpus: 4
+         coresPerSocket: 2
+         memoryMiB: 16384
+         osDisk:
+           diskSizeGiB: 120
+   credentialsMode: Manual
+   metadata:
+     creationTimestamp: null
+     name: ocp
+   networking:
+     clusterNetwork:
+     - cidr: 10.128.0.0/14
+       hostPrefix: 23
+     machineNetwork:
+     - cidr: 172.16.90.0/24
+     networkType: OVNKubernetes
+     serviceNetwork:
+     - 172.30.0.0/16
+   platform:
+     nutanix:
+       apiVIPs:
+       - 172.16.90.223
+       ingressVIPs:
+       - 172.16.90.224
+       prismCentral:
+         endpoint:
+           address: nx3500pc.ken.lab
+           port: 9440
+         password: Nutanix/Lab123
+         username: admin
+       prismElements:
+       - endpoint:
+           address: 172.16.90.71
+           port: 9440
+         uuid: 0005f5e3-b012-833d-30e7-002590c84b9a
+       subnetUUIDs:
+       - 91bec494-3a7a-482a-b00b-bceaadf47489
+   publish: External
+   pullSecret: '{"auths":{"cloud.openshift.com":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K29jbV9hY2Nlc3NfN2FiMGVmMjg5NTc5NGQ2ODgzOGYwZTYzNGI4OWRkNjI6Mk5CREU5T1NZTEdHWUtLOEFGOUlDTTcyMzZVSUVMSzUxTUpGOFcyWEdPSk9BU1haTDc1S0hQMUZHWURLNzgwSw==","email":"kenwang906@gmail.com"},"quay.io":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K29jbV9hY2Nlc3NfN2FiMGVmMjg5NTc5NGQ2ODgzOGYwZTYzNGI4OWRkNjI6Mk5CREU5T1NZTEdHWUtLOEFGOUlDTTcyMzZVSUVMSzUxTUpGOFcyWEdPSk9BU1haTDc1S0hQMUZHWURLNzgwSw==","email":"kenwang906@gmail.com"},"registry.connect.redhat.com":{"auth":"fHVoYy1wb29sLWU2MjU1MTBkLTE1ZjAtNGE5NS1iNGJjLTk2MzU5NTgzYmNmZTpleUpoYkdjaU9pSlNVelV4TWlKOS5leUp6ZFdJaU9pSTFOR0l3T1RVNE5HUTJZMkUwTUdJME9HRXlNVFExTWpRM1lqZGhNVGt6WlNKOS5vUm5uQ0tVQVZ2T3hyYk5la0JaTlNRdUhzTXVZV3BhM2tGdTNJQ2tzQ3NGSjhsaDZVUGdRb1NnM0hXT3IzcHAyVy15MVNBN29BNnRlbTB0ekVfenZwTTJCeWxsUkNnVEh1RlNZSE1DamxXRTZ2NUhDRjB2S3dtUFZ1ODNuRzRaakFwZzJRSk9kYkg4XzFaT0xDNlBqbkFGSi1uSDVLZFBxU3JNd3g1b19yYnZPQVRSRXktX2lQVW9zMXc0bTRzNUNncm9FNkFwNk5qY3FTanlGdjJOcDA5QVQ4aVA3Xzk4d2FfMW1WUEI4QkItcVJBVi1xclFYRGY0cEtwMzlYNExoNzgyalZYQ1V1SnZJUjN1SUdVUm1qWGVaYTEzSG5VcHcxdFc4aXZuUjVaV19iZndjZmoxR3FVVGo1a0stczJmeTdlNHFvSzdJTklGajJOZkM2dGhnZU5ST2FlR3E1dDZhUUV3dnV4UDV2dFViOTNEdElfc3JUOG5vcUszTXI2NkRLMUNTUTlianZMUkxNMVZOY2xCdUp2RS1yZGxkTDAyQ0ZkWTZJcmZ1VUpzN1VvcVE3WWdISWFVSFk3SDlGVE9qOWdsaWlSUTZ3MlhJNDM0dHNxTDJHLU85Ty1LTGVFUnF4ZjROY0o3NkFzaGE3aTNORW4yWHZaV0JmdXNmWEsyQUVscUt2N1FSQXhWVTFNQXN1TDdmTVNVaktrWkZFUUR2ZEZ2Tktoem1iVUVRTjl0dDMycFNvYVpCWnltRVB0WVl2ZzNPdG9pLW55Zmh1X1pzVEJzQkxRTGVZNTRJc2dZWk4zV0ZtV0hSSlBZOG53dm84bjZEN1lrT2ZqNzFhMEF5b3Btc2ZuLWp0Uk5KU3g3RGlCSlV3SkRnbFJYXzI1Y3lXR0JsZjFvODE1cw==","email":"kenwang906@gmail.com"},"registry.redhat.io":{"auth":"fHVoYy1wb29sLWU2MjU1MTBkLTE1ZjAtNGE5NS1iNGJjLTk2MzU5NTgzYmNmZTpleUpoYkdjaU9pSlNVelV4TWlKOS5leUp6ZFdJaU9pSTFOR0l3T1RVNE5HUTJZMkUwTUdJME9HRXlNVFExTWpRM1lqZGhNVGt6WlNKOS5vUm5uQ0tVQVZ2T3hyYk5la0JaTlNRdUhzTXVZV3BhM2tGdTNJQ2tzQ3NGSjhsaDZVUGdRb1NnM0hXT3IzcHAyVy15MVNBN29BNnRlbTB0ekVfenZwTTJCeWxsUkNnVEh1RlNZSE1DamxXRTZ2NUhDRjB2S3dtUFZ1ODNuRzRaakFwZzJRSk9kYkg4XzFaT0xDNlBqbkFGSi1uSDVLZFBxU3JNd3g1b19yYnZPQVRSRXktX2lQVW9zMXc0bTRzNUNncm9FNkFwNk5qY3FTanlGdjJOcDA5QVQ4aVA3Xzk4d2FfMW1WUEI4QkItcVJBVi1xclFYRGY0cEtwMzlYNExoNzgyalZYQ1V1SnZJUjN1SUdVUm1qWGVaYTEzSG5VcHcxdFc4aXZuUjVaV19iZndjZmoxR3FVVGo1a0stczJmeTdlNHFvSzdJTklGajJOZkM2dGhnZU5ST2FlR3E1dDZhUUV3dnV4UDV2dFViOTNEdElfc3JUOG5vcUszTXI2NkRLMUNTUTlianZMUkxNMVZOY2xCdUp2RS1yZGxkTDAyQ0ZkWTZJcmZ1VUpzN1VvcVE3WWdISWFVSFk3SDlGVE9qOWdsaWlSUTZ3MlhJNDM0dHNxTDJHLU85Ty1LTGVFUnF4ZjROY0o3NkFzaGE3aTNORW4yWHZaV0JmdXNmWEsyQUVscUt2N1FSQXhWVTFNQXN1TDdmTVNVaktrWkZFUUR2ZEZ2Tktoem1iVUVRTjl0dDMycFNvYVpCWnltRVB0WVl2ZzNPdG9pLW55Zmh1X1pzVEJzQkxRTGVZNTRJc2dZWk4zV0ZtV0hSSlBZOG53dm84bjZEN1lrT2ZqNzFhMEF5b3Btc2ZuLWp0Uk5KU3g3RGlCSlV3SkRnbFJYXzI1Y3lXR0JsZjFvODE1cw==","email":"kenwang906@gmail.com"}}}'
+   sshKey: |
+     ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB6G2bHLlXOThGUs2NX2UWR4ObK9t14G2Tiw+nXRVV6W ken@bastion.ocp.ken.lab
+   ```
+
+5. Configuring IAM for Nutanix
+
+   ```
+   [ken@bastion ocp_4-12-6]$ RELEASE_IMAGE=$(openshift-install version | awk '/release image/ {print $3}')
+   [ken@bastion ocp_4-12-6]$ oc adm release extract --credentials-requests --cloud=nutanix --to=./credrequests $RELEASE_IMAGE
+   Extracted release payload created at 2023-03-01T12:46:29Z
+   ```
+
+6. 建立cred.yaml >> Nutanix連線資訊
+
+   ```
+   credentials:
+   - type: basic_auth
+     data:
+       prismCentral:
+         username: admin
+         password: Nutanix/Lab123
+       prismElements:
+       - name: NX3500PE
+         username: admin
+         password: Nutanix/Lab123
+   ```
+
+7. 建立cco secret
+
+   ```
+   [ken@bastion ocp_4-12-6]$ /
+   2023/03/25 17:41:09 Saved credentials configuration to: manifests/openshift-machine-api-nutanix-credentials-credentials.yaml
+   
+   [ken@bastion ocp_4-12-6]$ ll
+   total 8
+   drwxr-xr-x. 2 ken ken   70 Mar 25 17:38 credrequests
+   -rw-r--r--. 1 ken ken  204 Mar 25 17:37 cred.yaml
+   -rw-r-----. 1 ken ken 3886 Mar 25 17:34 install-config.yaml
+   drwx------. 2 ken ken   72 Mar 25 17:41 manifests
+   ```
+
+8. 創建工作目錄
+
+   ```
+   [ken@bastion ocp_4-12-6]$ mkdir install
+   [ken@bastion ocp_4-12-6]$ cp install-config.yaml install
+   ```
+
+9. 建立manifests並複製secret的yaml
+
+   ```
+   [ken@bastion ocp_4-12-6]$ openshift-install create manifests --dir /home/ken/ocp_4-12-6/install
+   INFO Consuming Install Config from target directory
+   INFO Manifests created in: /home/ken/ocp_4-12-6/install/manifests and /home/ken/ocp_4-12-6/install/openshift
+   [ken@bastion ocp_4-12-6]$ cp manifests/openshift-machine-api-nutanix-credentials-credentials.yaml install/manifests/
+   [ken@bastion ocp_4-12-6]$ ll install/manifests/
+   total 64
+   -rw-r-----. 1 ken ken  1715 Mar 25 17:43 cluster-config.yaml
+   -rw-r-----. 1 ken ken   140 Mar 25 17:43 cluster-dns-02-config.yml
+   -rw-r-----. 1 ken ken   858 Mar 25 17:43 cluster-infrastructure-02-config.yml
+   -rw-r-----. 1 ken ken   215 Mar 25 17:43 cluster-ingress-02-config.yml
+   -rw-r-----. 1 ken ken 10135 Mar 25 17:43 cluster-network-01-crd.yml
+   -rw-r-----. 1 ken ken   273 Mar 25 17:43 cluster-network-02-config.yml
+   -rw-r-----. 1 ken ken   142 Mar 25 17:43 cluster-proxy-01-config.yaml
+   -rw-r-----. 1 ken ken   171 Mar 25 17:43 cluster-scheduler-02-config.yml
+   -rw-r-----. 1 ken ken   200 Mar 25 17:43 cvo-overrides.yaml
+   -rw-r-----. 1 ken ken   118 Mar 25 17:43 kube-cloud-config.yaml
+   -rw-r-----. 1 ken ken  1304 Mar 25 17:43 kube-system-configmap-root-ca.yaml
+   -rw-r-----. 1 ken ken  4062 Mar 25 17:43 machine-config-server-tls-secret.yaml
+   -rw-r-----. 1 ken ken  3857 Mar 25 17:43 openshift-config-secret-pull-secret.yaml
+   -rw-------. 1 ken ken   379 Mar 25 17:46 openshift-machine-api-nutanix-credentials-credentials.yaml
+   
+   ```
+
+10. 建立cluster
+
+    ```
+    [ken@bastion ocp_4-12-6]$ openshift-install create cluster --dir /home/ken/ocp_4-12-6/install --log-level=info
+    INFO Consuming Master Machines from target directory 
+    INFO Consuming OpenShift Install (Manifests) from target directory 
+    INFO Consuming Openshift Manifests from target directory 
+    INFO Consuming Worker Machines from target directory 
+    INFO Consuming Common Manifests from target directory 
+    INFO Creating infrastructure resources...
+    
+    ```
 
 11. 123
 

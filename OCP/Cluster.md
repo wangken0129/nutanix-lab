@@ -62,7 +62,7 @@ DNS:
 3. 安裝Bastion rhel9.0
    ![image-20230324105850586](assets/ocp_bastion.png)
 
-4. 123
+   
 
 ## 安裝步驟
 
@@ -188,11 +188,7 @@ DNS:
    Use "ccoctl [command] --help" for more information about a command.
    ```
 
-8. 123
-
-9. 123
-
-10. 123
+   
 
 ### Bastion
 
